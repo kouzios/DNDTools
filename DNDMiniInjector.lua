@@ -2813,60 +2813,10 @@ function forwardInitiative(player)
         return
     end
 
-    updateInitPlayerForward(player)
+    options.initCurrentRound = options.initCurrentRound + 1
 
     rebuildUI()
     setInitiativeNotes()
-end
-
-function updateInitPlayerForward(player)
-    local foundInitFigure = false
-    local changedInitFigure = false
-    --find the next player
-    for _, figure in ipairs(initFigures) do
-        if figure.guidValue == options.initCurrentGUID then
-            foundInitFigure = true
-        elseif foundInitFigure == true then
-            options.initCurrentValue = figure.initValue
-            options.initCurrentGUID = figure.guidValue
-            changedInitFigure = true
-            break
-        end
-    end
-    -- if we couldn't find them by guid, just use initiative value
-    if changedInitFigure == false and foundInitFigure == false then
-        for _, figure in ipairs(initFigures) do
-            if figure.initValue <= options.initCurrentValue and figure.guidValue ~= options.initCurrentGUID then
-                options.initCurrentValue = figure.initValue
-                options.initCurrentGUID = figure.guidValue
-                changedInitFigure = true
-                break
-            end
-        end
-    end
-    --If we still couldn't find one, loop back around to the top of the list
-    if changedInitFigure == false then
-        for _, figure in ipairs(initFigures) do
-            options.initCurrentValue = figure.initValue
-            options.initCurrentGUID = figure.guidValue
-            changedInitFigure = true
-            break
-        end
-        options.initCurrentRound = options.initCurrentRound + 1
-    end
-    if changedInitFigure == true and pingInitMinis and player ~= nil then
-        figureObj = getObjectFromGUID(options.initCurrentGUID)
-        if player.team == nil then
-            -- We're a color, not a player, assign the player object
-            for _, loopPlayer in ipairs(Player.getPlayers()) do
-                if loopPlayer.color == player then
-                   player = loopPlayer
-                   break
-                end
-            end
-        end
-        player.pingTable(figureObj.getBounds().center)
-    end
 end
 
 function backwardInitiative(player)
@@ -2883,64 +2833,12 @@ function backwardInitiative(player)
         return
     end
 
-    updateInitPlayerBackward(player)
+    if options.initCurrentRound > 1 then
+        options.initCurrentRound = options.initCurrentRound - 1
+    end
 
     rebuildUI()
     setInitiativeNotes()
-end
-
-function updateInitPlayerBackward(player)
-    local previousFigure = nil
-    local foundInitFigure = false
-    local changedInitFigure = false
-    --find the previous player
-    for _, figure in ipairs(initFigures) do
-        if figure.guidValue == options.initCurrentGUID then
-            foundInitFigure = true
-            if previousFigure ~= nil then
-                options.initCurrentValue = previousFigure.initValue
-                options.initCurrentGUID = previousFigure.guidValue
-                changedInitFigure = true
-                break
-            end
-        else
-            previousFigure = figure
-        end
-    end
-    -- if we couldn't find them by guid, just use initiative value
-    if changedInitFigure == false and foundInitFigure == false then
-        for _, figure in ipairs(initFigures) do
-            if figure.initValue >= options.initCurrentValue and previousFigure ~= nil then
-                foundInitFigure = true
-                options.initCurrentValue = previousFigure.initValue
-                options.initCurrentGUID = previousFigure.guidValue
-                changedInitFigure = true
-                break
-            else
-                previousFigure = figure
-            end
-        end
-    end
-    --If we still couldn't find one, loop back around to the bottom of the list
-    if changedInitFigure == false then
-        options.initCurrentValue = previousFigure.initValue
-        options.initCurrentGUID = previousFigure.guidValue
-        changedInitFigure = true
-        options.initCurrentRound = options.initCurrentRound - 1
-    end
-    if changedInitFigure == true and pingInitMinis and player ~= nil then
-        figureObj = getObjectFromGUID(options.initCurrentGUID)
-        if player.team == nil then
-            -- We're a color, not a player, assign the player object
-            for _, loopPlayer in ipairs(Player.getPlayers()) do
-                if loopPlayer.color == player then
-                   player = loopPlayer
-                   break
-                end
-            end
-        end
-        player.pingTable(figureObj.getBounds().center)
-    end
 end
 
 --Format each result into a string that goes into notes
@@ -2963,15 +2861,10 @@ end
 function getInitiativeString(figure)
     local figureColorA = "[" .. figure.colorHex .. "]"
     local figureColorB = "[-]"
-    local initiativeMarker = ""
-    if figure.guidValue == options.initCurrentGUID then
-        initiativeMarker = "---->"
-    end
     if figure.player == false then
-        return "[FFFFFF]" .. initiativeMarker .. figure.name .. "     " .. figure.initValue .. "[-]\n"
+        return "[FFFFFF]" ..  figure.name .. "     " .. figure.initValue .. "[-]\n"
     else
-
-        return "[b][i]" .. figureColorA .. initiativeMarker .. figure.name .. "     " .. figure.initValue .. "[/b][/i]" .. figureColorB .. "\n"
+        return "[b][i]" .. figureColorA .. figure.name .. "     " .. figure.initValue .. "[/b][/i]" .. figureColorB .. "\n"
     end
 end
 
