@@ -434,7 +434,7 @@ function resetInitiative()
     updateSave()
 end
 
-function getInitiative(inputActive, figureName)
+function getInitiative(inputActive)
     if options.initRealActive == true then
         if debuggingEnabled then
             print(self.getName() .. ' init real cache ' .. options.initRealValue)
@@ -446,7 +446,7 @@ function getInitiative(inputActive, figureName)
         if options.initMockActive == true then
             options.initRealValue = options.initMockValue
         else
-            options.initRealValue = calculateInitiative(figureName)
+            options.initRealValue = calculateInitiative()
         end
         if debuggingEnabled then
             print(self.getName() .. ' init real calc' .. options.initRealValue)
@@ -461,7 +461,7 @@ function getInitiative(inputActive, figureName)
         return options.initMockValue
     end
     options.initMockActive = true
-    options.initMockValue = calculateInitiative(figureName)
+    options.initMockValue = calculateInitiative()
     if debuggingEnabled then
         print(self.getName() .. ' init mock calc ' .. options.initMockValue)
     end
@@ -469,7 +469,7 @@ function getInitiative(inputActive, figureName)
     return options.initMockValue
 end
 
-function calculateInitiative(figureName)
+function calculateInitiative()
     if options.initSettingsRolling == true then
         if options.advInitiative == true then
             return math.max(math.random(1,20), math.random(1,20)) + tonumber(options.initSettingsMod)
@@ -2663,16 +2663,15 @@ function handleInitMiniature(miniature)
         else
             colorTint = Color.White
         end
-        local figureName = miniature.getName()
         local figure = {
-            nameHealth = figureName .. " " .. miniature.UI.getAttribute("hpText", "Text"),
+            nameHealth = miniature.getName() .. " " .. miniature.UI.getAttribute("hpText", "Text"),
             guidValue = miniature.getGUID(),
-            initValue = tonumber(miniature.call("getInitiative", options.initActive, figureName)),
+            initValue = tonumber(miniature.call("getInitiative", options.initActive)),
             initText = "",
             initMod = tonumber(objTable.initSettingsMod),
             initRolling = objTable.initSettingsRolling,
             player = player,
-            name = figureName,
+            name = miniature.getName(),
             obj = miniature,
             options = objTable,
             health = miniature.getTable("health"),
