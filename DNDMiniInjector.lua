@@ -409,6 +409,7 @@ options = {
     showBarButtons = false,
     hideHp = false,
     hideInitiative = false,
+    advInitiative = false,
     hideMana = true,
     hideExtra = true,
     incrementBy = 1,
@@ -433,7 +434,7 @@ function resetInitiative()
     updateSave()
 end
 
-function getInitiative(inputActive)
+function getInitiative(inputActive, figureName)
     if options.initRealActive == true then
         if debuggingEnabled then
             print(self.getName() .. ' init real cache ' .. options.initRealValue)
@@ -445,7 +446,7 @@ function getInitiative(inputActive)
         if options.initMockActive == true then
             options.initRealValue = options.initMockValue
         else
-            options.initRealValue = calculateInitiative()
+            options.initRealValue = calculateInitiative(figureName)
         end
         if debuggingEnabled then
             print(self.getName() .. ' init real calc' .. options.initRealValue)
@@ -460,7 +461,7 @@ function getInitiative(inputActive)
         return options.initMockValue
     end
     options.initMockActive = true
-    options.initMockValue = calculateInitiative()
+    options.initMockValue = calculateInitiative(figureName)
     if debuggingEnabled then
         print(self.getName() .. ' init mock calc ' .. options.initMockValue)
     end
@@ -468,11 +469,14 @@ function getInitiative(inputActive)
     return options.initMockValue
 end
 
-function calculateInitiative()
+function calculateInitiative(figureName)
     if options.initSettingsRolling == true then
+        if options.advInitiative == true then
+            return math.max(math.random(1,20), math.random(1,20)) + tonumber(options.initSettingsMod)
+        end
         return math.random(1,20) + tonumber(options.initSettingsMod)
     else
-        return tonumber(options.initSettingsValue)
+        return tonumber(options.initSettingsMod)
     end
 end
 
@@ -734,11 +738,12 @@ function loadStageTwo()
     coroutine.yield(0)
 
     self.UI.setAttribute("PlayerCharToggle", "textColor", player == true and "#AA2222" or "#FFFFFF")
+    self.UI.setAttribute("HH", "textColor", options.hideHp == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("MeasureMoveToggle", "textColor", measureMove == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("AlternateDiagToggle", "textColor", alternateDiag == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("MetricModeToggle", "textColor", metricMode == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("StabilizeToggle", "textColor", stabilizeOnDrop == true and "#AA2222" or "#FFFFFF")
-    self.UI.setAttribute("HH", "textColor", options.hideHp == true and "#AA2222" or "#FFFFFF")
+    self.UI.setAttribute("AI", "textColor", options.advInitiative == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("HI", "textColor", options.hideInitiative == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("HM", "textColor", options.hideMana == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("HE", "textColor", options.hideExtra == true and "#AA2222" or "#FFFFFF")
@@ -1513,7 +1518,12 @@ function onClick(player_in, value, id)
     elseif id == "HI" then
 	    options.hideInitiative = not options.hideInitiative
         Wait.frames(function()
-                self.UI.setAttribute("HI", "textColor", options.hideInitiative == true and "#AA2222" or "#FFFFFF")
+            self.UI.setAttribute("HI", "textColor", options.hideInitiative == true and "#AA2222" or "#FFFFFF")
+        end, 1)
+    elseif id == "AI" then
+        options.advInitiative = not options.advInitiative
+        Wait.frames(function()
+            self.UI.setAttribute("AI", "textColor", options.advInitiative == true and "#AA2222" or "#FFFFFF")
         end, 1)
     elseif id == "HM" then
         options.hideMana = not options.hideMana
@@ -1824,7 +1834,7 @@ LUAStop--lua]]
             </Panel>
         </Panel>
     </VerticalLayout>
-    <Panel id="editPanel" height="1742" width="800" color="#330000FF" position="0 1290 0" active="False">
+    <Panel id="editPanel" height="1864" width="800" color="#330000FF" position="0 1290 0" active="False">
         <ProgressBar id="blackBackground" visibility="" height="1620" width="800" showPercentageText="false" color="#330000FF" percentage="100" fillImageColor="#330000FF" position="0 -320 0"></ProgressBar>
         <HorizontalLayout>
             <VerticalLayout>
@@ -1838,8 +1848,9 @@ LUAStop--lua]]
                     <Text>Rotation</Text>
                     <Button id="addRotation" text="►" minwidth="90"></Button>
                 </HorizontalLayout>
-                <HorizontalLayout minheight="100">
+                <HorizontalLayout minheight="160">
                     <Button id="PlayerCharToggle" onClick="togglePlayer" fontSize="70" text="Player Character" color="#000000FF"></Button>
+                    <Button id="HH" fontSize="70" text="Hide Health" color="#000000FF"></Button>
                 </HorizontalLayout>
                 <HorizontalLayout minheight="160">
                     <Button id="MeasureMoveToggle" onClick="toggleMeasure" fontSize="70" text="Measure Moves" color="#000000FF"></Button>
@@ -1857,7 +1868,7 @@ LUAStop--lua]]
                     <Button id="AM" fontSize="70" text="Above Max" color="#000000FF"></Button>
                 </HorizontalLayout>
                 <HorizontalLayout minheight="160">
-                    <Button id="HH" fontSize="70" text="Hide Health" color="#000000FF"></Button>
+                    <Button id="AI" fontSize="70" text="Adv Initiative" color="#000000FF"></Button>
                     <Button id="HI" fontSize="70" text="Hide Initiative" color="#000000FF"></Button>
                 </HorizontalLayout>
                 <HorizontalLayout minheight="100">
@@ -2652,15 +2663,16 @@ function handleInitMiniature(miniature)
         else
             colorTint = Color.White
         end
+        local figureName = miniature.getName()
         local figure = {
-            nameHealth = miniature.getName() .. " " .. miniature.UI.getAttribute("hpText", "Text"),
+            nameHealth = figureName .. " " .. miniature.UI.getAttribute("hpText", "Text"),
             guidValue = miniature.getGUID(),
-            initValue = tonumber(miniature.call("getInitiative", options.initActive)),
+            initValue = tonumber(miniature.call("getInitiative", options.initActive, figureName)),
             initText = "",
             initMod = tonumber(objTable.initSettingsMod),
             initRolling = objTable.initSettingsRolling,
             player = player,
-            name = miniature.getName(),
+            name = figureName,
             obj = miniature,
             options = objTable,
             health = miniature.getTable("health"),
