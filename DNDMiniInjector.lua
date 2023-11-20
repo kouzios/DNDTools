@@ -1033,8 +1033,8 @@ function rebuildContextMenu()
 end
 
 function addContextMenuItemsWildShape()
-    wildShapeBag = nil
-    taggedBags = getObjectsWithTag("WildShape")
+    local wildShapeBag = nil
+    local taggedBags = getObjectsWithTag("WildShape")
     for i,bag in ipairs(taggedBags) do
         if bag.getName() == "WildShape_Beasts" then
             wildShapeBag = bag
@@ -1042,11 +1042,13 @@ function addContextMenuItemsWildShape()
         end
     end
 
-    bagObjects = wildShapeBag.getObjects()
-    table.sort(bagObjects, function(a, b) return a.name < b.name end)
+    local bagObjects = wildShapeBag.getData().ContainedObjects
+    table.sort(bagObjects, function(a, b) return a.Nickname < b.Nickname end)
 
     for i,beast in ipairs(bagObjects) do
-        self.addContextMenuItem(beast.name, function() wildShape(wildShapeBag, beast) end)
+        local description = beast.Description
+        local beastJSON = JSON.encode(beast)
+        self.addContextMenuItem(beast.Nickname, function() wildShape(description, beastJSON) end)
     end
 end
 
@@ -1252,7 +1254,7 @@ function reloadMini()
     self.reload()
 end
 
-function wildShape(bag, beast)
+function wildShape(description, beastJSON)
     -- TODO: Add new wildshape HP bar (rather than using the extra bar)
     -- TODO: Can we actually transform the model itself?
     -- TODO: UI height up to max of beast model?
@@ -1262,13 +1264,15 @@ function wildShape(bag, beast)
     -- TODO: Individual wild shape (each person gets their own bag)?
     -- TODO: Sound off for bag?
     -- TODO: BUG: If people fuck around with the bag that fucks things up
+    -- TODO: End wildshpae or do wildshape, and if do wildshape already shaped end first
+    -- TODO: How do we handle adv initiative?
 
     willWildShape = not willWildShape
     toggleHideFromPlayers()
 
-    beastStats = grabNumbers(beast.description)
-    beastHP = beastStats[1]
-    beastInit = beastStats[2]
+    local beastStats = grabNumbers(description) --TODO: Negative numbers?
+    local beastHP = beastStats[1]
+    local beastInit = beastStats[2]
 
     if willWildShape == false then
         onEndEdit(-1, preWildShapeInit, "InitModInput")
@@ -1278,22 +1282,20 @@ function wildShape(bag, beast)
         self.addForce({x=0,y=-1,z=0})
         spawnedObject.destruct()
     else
-        spawnedObject = bag.takeObject({index = beast.index})
-        bag.putObject(spawnedObject)
-        
         spawnedObject = spawnObjectJSON({
-            json = spawnedObject.getJSON(),
+            json = beastJSON,
             position = self.getPosition(),
             rotation = {x=0, y=180, z=0},
             sound = false
-        })
+        }) --TODO: Split name?
+        spawnedObject.setName("(" .. self.getName() .. ") " .. spawnedObject.getName())
         spawnedObject.jointTo(self, {
             ["type"] = "Fixed",
             ["collision"] = false,
             ["break_force"] = 1000.0,
             ["break_torque"] = 1000.0,
         })
-        spawnedObject.addContextMenuItem("End Wildshape", function () wildShape(bag, beast) end)
+        spawnedObject.addContextMenuItem("End Wildshape", function () wildShape(description, beastJSON) end)
 
         onClick(-1, -1, "HE")
         onClick(-1, beastHP, "addMaxE")
