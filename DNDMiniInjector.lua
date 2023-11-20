@@ -1021,11 +1021,32 @@ function rebuildContextMenu()
     end
     self.addContextMenuItem("Reset Scale", resetScale)
     self.addContextMenuItem("Reload Mini", reloadMini)
-    self.addContextMenuItem("Wildshape (BEAR)", wildShapeBear)
     if debuggingEnabled == true then
         self.addContextMenuItem("[X] Debugging", toggleDebug)
     else
         self.addContextMenuItem("[ ] Debugging", toggleDebug)
+    end
+
+    if not pcall(addContextMenuItemsWildShape) then
+        print("Wildshaping failed to set up. Does the 'WildShape_Beasts' bag exist with the 'WildShape' tag?")
+    end
+end
+
+function addContextMenuItemsWildShape()
+    wildShapeBag = nil
+    taggedBags = getObjectsWithTag("WildShape")
+    for i,bag in ipairs(taggedBags) do
+        if bag.getName() == "WildShape_Beasts" then
+            wildShapeBag = bag
+            break
+        end
+    end
+
+    bagObjects = wildShapeBag.getObjects()
+    table.sort(bagObjects, function(a, b) return a.name < b.name end)
+
+    for i,beast in ipairs(bagObjects) do
+        self.addContextMenuItem(beast.name, function() wildShape(wildShapeBag, beast) end)
     end
 end
 
@@ -1231,45 +1252,64 @@ function reloadMini()
     self.reload()
 end
 
-function wildShapeBear()
-    -- TODO: New wildshape HP bar (green?)
-    -- TODO: More wild shapes (hselect via list like toggle)
-    --     (Pull from a bag in the table maybe? And if no bag then generic object?) 
+function wildShape(bag, beast)
+    -- TODO: Add new wildshape HP bar (rather than using the extra bar)
     -- TODO: Can we actually transform the model itself?
-    -- TODO: UI height up to max of beast model
+    -- TODO: UI height up to max of beast model?
+    -- TODO: Can't alter HP when wildshaped?
+    -- TODO: Make shapes NPC objects with their own bars? Then hide player in a bag?
+    -- TODO: Have wildshape be a UI popup to avoid context clutter?
+    -- TODO: Individual wild shape (each person gets their own bag)?
+    -- TODO: Sound off for bag?
+    -- TODO: BUG: If people fuck around with the bag that fucks things up
 
     willWildShape = not willWildShape
     toggleHideFromPlayers()
+
+    beastStats = grabNumbers(beast.description)
+    beastHP = beastStats[1]
+    beastInit = beastStats[2]
+
     if willWildShape == false then
         onEndEdit(-1, preWildShapeInit, "InitModInput")
         onClick(-1, -1, "HE")
-        onClick(-1, 34, "subMaxE")
+        onClick(-1, beastHP, "subMaxE")
 
         self.addForce({x=0,y=-1,z=0})
         spawnedObject.destruct()
     else
-        spawnedObject = spawnObject({
-            type = "rpg_BEAR",
-            position = {0, 0, 0},
-            rotation = {0, 180, 0},
-            scale = {1, 1, 1},
-            sound = false,
-            snap_to_grid = false
-        }) 
-        spawnedObject.setPosition(self.getPosition())
+        spawnedObject = bag.takeObject({index = beast.index})
+        bag.putObject(spawnedObject)
+        
+        spawnedObject = spawnObjectJSON({
+            json = spawnedObject.getJSON(),
+            position = self.getPosition(),
+            rotation = {x=0, y=180, z=0},
+            sound = false
+        })
         spawnedObject.jointTo(self, {
             ["type"] = "Fixed",
             ["collision"] = false,
             ["break_force"] = 1000.0,
             ["break_torque"] = 1000.0,
         })
-        spawnedObject.addContextMenuItem("End Wildshape", wildShapeBear)
+        spawnedObject.addContextMenuItem("End Wildshape", function () wildShape(bag, beast) end)
 
         onClick(-1, -1, "HE")
-        onClick(-1, 34, "addMaxE")
+        onClick(-1, beastHP, "addMaxE")
         preWildShapeInit = options.initSettingsMod
-        onEndEdit(-1, 0, "InitModInput") --TODO: Instead of ""
+        onEndEdit(-1, beastInit, "InitModInput")
     end
+end
+
+function grabNumbers(s) 
+    tbl = {}
+    if s == nil then return {} end
+    
+    for entry in string.gmatch(s, "%d+") do
+        table.insert(tbl, entry)
+    end
+    return tbl;
 end
 
 function resetScale()
