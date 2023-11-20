@@ -400,6 +400,11 @@ highlightToggle = true
 hideFromPlayers = false
 firstEdit = true
 
+-- Variables for wild shaping
+willWildShape = false
+spawnedObject = nil
+preWildShapeInit = 0
+
 options = {
     HP2Desc = false,
     belowZero = false,
@@ -1016,6 +1021,7 @@ function rebuildContextMenu()
     end
     self.addContextMenuItem("Reset Scale", resetScale)
     self.addContextMenuItem("Reload Mini", reloadMini)
+    self.addContextMenuItem("Wildshape (BEAR)", wildShapeBear)
     if debuggingEnabled == true then
         self.addContextMenuItem("[X] Debugging", toggleDebug)
     else
@@ -1048,10 +1054,6 @@ function toggleDebug()
 end
 
 function toggleHideFromPlayers()
-    if player == true and hideFromPlayers == false then
-        print(self.getName() .. " is a player character, cannot hide.")
-        return
-    end
     hideFromPlayers = not hideFromPlayers
     if hideFromPlayers then
         aColors = Player.getAvailableColors()
@@ -1227,6 +1229,47 @@ end
 
 function reloadMini()
     self.reload()
+end
+
+function wildShapeBear()
+    -- TODO: New wildshape HP bar (green?)
+    -- TODO: More wild shapes (hselect via list like toggle)
+    --     (Pull from a bag in the table maybe? And if no bag then generic object?) 
+    -- TODO: Can we actually transform the model itself?
+    -- TODO: UI height up to max of beast model
+
+    willWildShape = not willWildShape
+    toggleHideFromPlayers()
+    if willWildShape == false then
+        onEndEdit(-1, preWildShapeInit, "InitModInput")
+        onClick(-1, -1, "HE")
+        onClick(-1, 34, "subMaxE")
+
+        self.addForce({x=0,y=-1,z=0})
+        spawnedObject.destruct()
+    else
+        spawnedObject = spawnObject({
+            type = "rpg_BEAR",
+            position = {0, 0, 0},
+            rotation = {0, 180, 0},
+            scale = {1, 1, 1},
+            sound = false,
+            snap_to_grid = false
+        }) 
+        spawnedObject.setPosition(self.getPosition())
+        spawnedObject.jointTo(self, {
+            ["type"] = "Fixed",
+            ["collision"] = false,
+            ["break_force"] = 1000.0,
+            ["break_torque"] = 1000.0,
+        })
+        spawnedObject.addContextMenuItem("End Wildshape", wildShapeBear)
+
+        onClick(-1, -1, "HE")
+        onClick(-1, 34, "addMaxE")
+        preWildShapeInit = options.initSettingsMod
+        onEndEdit(-1, 0, "InitModInput") --TODO: Instead of ""
+    end
 end
 
 function resetScale()
@@ -1659,8 +1702,10 @@ end
 function getIncrement(value)
     if value == "-1" then
         return options.incrementBy
-    else
+    elseif value == "-2" then
         return 10
+    else
+        return value
     end
 end
 
