@@ -401,8 +401,8 @@ hideFromPlayers = false
 firstEdit = true
 
 -- Variables for wild shaping
-willWildShape = false
-spawnedObject = nil
+isWildShaped = false
+wildShapeToken = nil
 preWildShapeInit = 0
 
 options = {
@@ -1254,61 +1254,69 @@ function reloadMini()
     self.reload()
 end
 
+function endWildShape() 
+    toggleHideFromPlayers()
+    onClick(-1, -1, "HE")
+
+    onEndEdit(-1, preWildShapeInit, "InitModInput")
+    onClick(-1, beastHP, "subMaxE")
+
+    self.addForce({x=0,y=-1,z=0})
+    wildShapeToken.destruct()
+
+    isWildShaped = false
+end
+
 function wildShape(description, beastJSON)
     -- TODO: Add new wildshape HP bar (rather than using the extra bar)
     -- TODO: Can we actually transform the model itself?
     -- TODO: UI height up to max of beast model?
-    -- TODO: Can't alter HP when wildshaped?
-    -- TODO: Make shapes NPC objects with their own bars? Then hide player in a bag?
+    -- TODO: Prevent alteration of HP when wildshaped?
     -- TODO: Have wildshape be a UI popup to avoid context clutter?
-    -- TODO: Individual wild shape (each person gets their own bag)?
-    -- TODO: Sound off for bag?
-    -- TODO: BUG: If people fuck around with the bag that fucks things up
+    -- TODO: Individual wild shapes (each person gets their own bag)?
     -- TODO: End wildshpae or do wildshape, and if do wildshape already shaped end first
-    -- TODO: How do we handle adv initiative?
+    -- TODO: Add manual rotation of UI to already rotated object?
+    -- TODO: Make hide from players not a toggle, just make not visible or visible?
 
-    willWildShape = not willWildShape
+    hideFromPlayers = false
     toggleHideFromPlayers()
-
-    local beastStats = grabNumbers(description) --TODO: Negative numbers?
-    local beastHP = beastStats[1]
+    local beastStats = grabNumbers(description)
+    beastHP = math.abs(beastStats[1])
     local beastInit = beastStats[2]
 
-    if willWildShape == false then
-        onEndEdit(-1, preWildShapeInit, "InitModInput")
-        onClick(-1, -1, "HE")
-        onClick(-1, beastHP, "subMaxE")
-
-        self.addForce({x=0,y=-1,z=0})
-        spawnedObject.destruct()
-    else
-        spawnedObject = spawnObjectJSON({
-            json = beastJSON,
-            position = self.getPosition(),
-            rotation = {x=0, y=180, z=0},
-            sound = false
-        }) --TODO: Split name?
-        spawnedObject.setName("(" .. self.getName() .. ") " .. spawnedObject.getName())
-        spawnedObject.jointTo(self, {
-            ["type"] = "Fixed",
-            ["collision"] = false,
-            ["break_force"] = 1000.0,
-            ["break_torque"] = 1000.0,
-        })
-        spawnedObject.addContextMenuItem("End Wildshape", function () wildShape(description, beastJSON) end)
-
-        onClick(-1, -1, "HE")
-        onClick(-1, beastHP, "addMaxE")
-        preWildShapeInit = options.initSettingsMod
-        onEndEdit(-1, beastInit, "InitModInput")
+    if isWildShaped == true then
+       endWildShape()
+       return
     end
+
+    wildShapeToken = spawnObjectJSON({
+        json = beastJSON,
+        position = self.getPosition(),
+        rotation = {x=0, y=180, z=0},
+        sound = false
+    })
+    wildShapeToken.setName(wildShapeToken.getName())
+    wildShapeToken.setDescription(self.getName())
+    wildShapeToken.jointTo(self, {
+        ["type"] = "Fixed",
+        ["collision"] = false,
+        ["break_force"] = 1000.0,
+        ["break_torque"] = 1000.0,
+    })
+    wildShapeToken.addContextMenuItem("End Wildshape", endWildShape)
+
+    onClick(-1, -1, "HE")
+    onClick(-1, beastHP, "addMaxE")
+    preWildShapeInit = options.initSettingsMod
+    onEndEdit(-1, beastInit, "InitModInput")
+    isWildShaped = true
 end
 
 function grabNumbers(s) 
     tbl = {}
     if s == nil then return {} end
     
-    for entry in string.gmatch(s, "%d+") do
+    for entry in string.gmatch(s, "%-?%d+") do
         table.insert(tbl, entry)
     end
     return tbl;
