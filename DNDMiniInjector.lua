@@ -476,7 +476,7 @@ function calculateInitiative()
         end
         return math.random(1,20) + tonumber(options.initSettingsMod)
     else
-        return tonumber(options.initSettingsMod)
+        return tonumber(options.initSettingsValue)
     end
 end
 
