@@ -1049,6 +1049,16 @@ function rebuildContextMenu()
     end
 end
 
+function buildWildShapeContextMenu() 
+    wildShapeToken.clearContextMenu()
+    wildShapeToken.addContextMenuItem("UI Height UP", uiHeightUp, true)
+    wildShapeToken.addContextMenuItem("UI Height DOWN", uiHeightDown, true)
+    wildShapeToken.addContextMenuItem("UI Rotate 90", uiRotate90, true)
+    wildShapeToken.addContextMenuItem("Increase Max HP", function() onClick(-1, -1, "addMaxW") end)
+    wildShapeToken.addContextMenuItem("Decrease Max HP", function() onClick(-1, -1, "subMaxW") end)
+    wildShapeToken.addContextMenuItem("End Wildshape", endWildShape)
+end
+
 function addContextMenuItemsWildShape()
     local wildShapeBag = nil
     local taggedBags = getObjectsWithTag("WildShape")
@@ -1285,11 +1295,11 @@ function endWildShape()
 end
 
 function wildShape(description, beastJSON)
-    -- TODO: Add Hide Bar 4 and Max 4 options (in case someone casts aid or something)
-      -- TODO: But only if IN wildshape mayhaps?
     -- TODO: Make hide from players not a toggle, just make not visible or visible?
     -- TODO: Can we actually transform the model itself? (Take properties, replace em)
-    -- TODO: UI height up to max of beast model? (Unsure if required if we can actually transform model)
+    -- TODO: UI height up to max of beast model? (Unsure required if we can actually transform model)
+      -- Or just add the increase UI height contexts to the wildshape to affect the self?
+      -- Or let them adjust it themselves, then store how much it was adjusted, and adjust it back the other direction?
     -- TODO: Add manual rotation of object if ui is rotated? 
       -- TODO: Add context menu rotate object option?
     -- IDEA: Individual wild shapes (each person gets their own bag)?
@@ -1321,7 +1331,8 @@ function wildShape(description, beastJSON)
         ["break_force"] = 1000.0,
         ["break_torque"] = 1000.0,
     })
-    wildShapeToken.addContextMenuItem("End Wildshape", endWildShape)
+
+    buildWildShapeContextMenu()
 
     onClick(-1, -1, "HW")
     onClick(-1, beastHP, "setMaxW")
@@ -1804,9 +1815,9 @@ function onClick(player_in, value, id)
 end
 
 function getIncrement(value)
-    if value == "-1" then
+    if value == "-1" or value == -1 then
         return options.incrementBy
-    elseif value == "-2" then
+    elseif value == "-2" or value == -2 then
         return 10
     else
         return value
@@ -2597,6 +2608,7 @@ function toggleHideBars(player, value, id)
                     j.UI.setAttribute("resourceBar", "active", "false")
                     j.UI.setAttribute("resourceBarS", "active", "false")
                     j.UI.setAttribute("extraBar", "active", "false")
+                    j.UI.setAttribute("wildShapeBar", "active", "false")
                 else
                     j.UI.setAttribute("resourceBar", "active", "true")
                     local objTable = j.getTable("options")
@@ -2605,6 +2617,9 @@ function toggleHideBars(player, value, id)
                     end
                     if not objTable.hideExtra then
                         j.UI.setAttribute("extraBar", "active", "true")
+                    end
+                    if not objTable.hideWildShapeHP then
+                        j.UI.setAttribute("wildShapeBar", "active", "true")
                     end
                 end
             end
@@ -2667,6 +2682,7 @@ function injectToken(object)
     if options.extra ~= 0 then
         newScript = newScript:gsub("hideExtra = true,", "hideExtra = false,")
     end
+    newScript = newScript:gsub("hideWildShapeHP = false,", "hideWildShapeHP = true,")
     newScript = newScript:gsub('<VerticalLayout id="bars" height="200">', '<VerticalLayout id="bars" height="' .. 200 + (options.mana == 0 and -100 or 0) + (options.extra ~= 0 and 100 or 0) .. '">')
 
     if options.measureMove == true then
