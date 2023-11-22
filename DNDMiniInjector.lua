@@ -389,6 +389,7 @@ savedAttachScales = {}
 health = {value = 10, max = 10}
 mana = {value = 10, max = 10}
 extra = {value = 10, max = 10}
+wildShapeHP = {value = 0, max = 0}
 
 player = false
 measureMove = false
@@ -417,6 +418,7 @@ options = {
     advInitiative = false,
     hideMana = true,
     hideExtra = true,
+    hideWildShapeHP = true,
     incrementBy = 1,
     rotation = 90,
     initSettingsIncluded = true,
@@ -698,6 +700,8 @@ function loadStageTwo()
     self.UI.setAttribute("manaText", "text", mana.value .. "/" .. mana.max)
     self.UI.setAttribute("extraProgress", "percentage", extra.value / extra.max * 100)
     self.UI.setAttribute("extraText", "text", extra.value .. "/" .. extra.max)
+    self.UI.setAttribute("wildShapeHPProgress", "percentage", wildShapeHP.value / wildShapeHP.max * 100)
+    self.UI.setAttribute("wildShapeHPText", "text", wildShapeHP.value .. "/" .. wildShapeHP.max)
     self.UI.setAttribute("manaText", "textColor", "#FFFFFF")
     self.UI.setAttribute("increment", "text", options.incrementBy)
     self.UI.setAttribute("InitModInput", "text", options.initSettingsMod)
@@ -717,6 +721,7 @@ function loadStageTwo()
         self.UI.setAttribute("addSub", "active", true)
         self.UI.setAttribute("addSubS", "active", true)
         self.UI.setAttribute("addSubE", "active", true)
+        self.UI.setAttribute("addSubW", "active", true)
         coroutine.yield(0)
     end
 
@@ -730,15 +735,17 @@ function loadStageTwo()
         options.hideExtra = true
     end
 
-    self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true) and "True" or "False")
+    self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true and options.hideWildShapeHP == true) and "True" or "False")
 
     self.UI.setAttribute("resourceBar", "active", options.hideHp == true and "False" or "True")
     self.UI.setAttribute("resourceBarS", "active", options.hideMana == true and "False" or "True")
     self.UI.setAttribute("extraBar", "active", options.hideExtra == true and "False" or "True")
+    self.UI.setAttribute("wildShapeBar", "active", options.hideWildShapeHP == true and "False" or "True")
 
     self.UI.setAttribute("addSub", "active", options.showBarButtons == true and "True" or "False")
     self.UI.setAttribute("addSubS", "active", options.showBarButtons == true and "True" or "False")
     self.UI.setAttribute("addSubE", "active", options.showBarButtons == true and "True" or "False")
+     self.UI.setAttribute("addSubW", "active", options.showBarButtons == true and "True" or "False")
     self.UI.setAttribute("panel", "rotation", options.rotation .. " 270 90")
     coroutine.yield(0)
 
@@ -752,6 +759,7 @@ function loadStageTwo()
     self.UI.setAttribute("HI", "textColor", options.hideInitiative == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("HM", "textColor", options.hideMana == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("HE", "textColor", options.hideExtra == true and "#AA2222" or "#FFFFFF")
+    self.UI.setAttribute("HW", "textColor", options.hideWildShapeHP == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("HB", "textColor", options.showBarButtons == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("BZ", "textColor", options.belowZero == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("AM", "textColor", options.aboveMax == true and "#AA2222" or "#FFFFFF")
@@ -782,12 +790,15 @@ function loadStageTwo()
                     self.UI.setAttribute("progressBar", "visibility", "")
                     self.UI.setAttribute("progressBarS", "visibility", "")
                     self.UI.setAttribute("extraProgress", "visibility", "")
+                    self.UI.setAttribute("wildShapeHPProgress", "visibility", "")
                     self.UI.setAttribute("hpText", "visibility", "")
                     self.UI.setAttribute("manaText", "visibility", "")
                     self.UI.setAttribute("extraText", "visibility", "")
+                    self.UI.setAttribute("wildShapeHPText", "visibility", "")
                     self.UI.setAttribute("addSub", "visibility", "")
                     self.UI.setAttribute("addSubS", "visibility", "")
                     self.UI.setAttribute("addSubE", "visibility", "")
+                    self.UI.setAttribute("addSubW", "visibility", "")
                     self.UI.setAttribute("editPanel", "visibility", "")
                     self.UI.setAttribute("leftSide1", "visibility", "")
                     self.UI.setAttribute("editButton0", "visibility", "")
@@ -805,29 +816,35 @@ function loadStageTwo()
                         self.UI.setAttribute("progressBar", "visibility", "Black")
                         self.UI.setAttribute("progressBarS", "visibility", "Black")
                         self.UI.setAttribute("extraProgress", "visibility", "Black")
+                        self.UI.setAttribute("wildShapeHPProgress", "visibility", "Black")
                     else
                         self.UI.setAttribute("progressBar", "visibility", "")
                         self.UI.setAttribute("progressBarS", "visibility", "")
                         self.UI.setAttribute("extraProgress", "visibility", "")
+                        self.UI.setAttribute("wildShapeHPProgress", "visibility", "")
                     end
                     if injOptions.hideText == true then
                         self.UI.setAttribute("hpText", "visibility", "Black")
                         self.UI.setAttribute("manaText", "visibility", "Black")
                         self.UI.setAttribute("extraText", "visibility", "Black")
+                        self.UI.setAttribute("wildShapeHPText", "visibility", "Black")
                     else
                         self.UI.setAttribute("hpText", "visibility", "")
                         self.UI.setAttribute("manaText", "visibility", "")
                         self.UI.setAttribute("extraText", "visibility", "")
+                        self.UI.setAttribute("wildShapeHPText", "visibility", "")
                     end
                     if injOptions.editText == true then
                         self.UI.setAttribute("addSub", "visibility", "Black")
                         self.UI.setAttribute("addSubS", "visibility", "Black")
                         self.UI.setAttribute("addSubE", "visibility", "Black")
+                        self.UI.setAttribute("addSubW", "visibility", "Black")
                         self.UI.setAttribute("editPanel", "visibility", "Black")
                     else
                         self.UI.setAttribute("addSub", "visibility", "")
                         self.UI.setAttribute("addSubS", "visibility", "")
                         self.UI.setAttribute("addSubE", "visibility", "")
+                        self.UI.setAttribute("addSubW", "visibility", "")
                         self.UI.setAttribute("editPanel", "visibility", "")
                     end
                     self.UI.setAttribute("panel", "active", injOptions.showAll == true and "true" or "false")
@@ -1256,10 +1273,10 @@ end
 
 function endWildShape() 
     toggleHideFromPlayers()
-    onClick(-1, -1, "HE")
+    onClick(-1, -1, "HW")
 
     onEndEdit(-1, preWildShapeInit, "InitModInput")
-    onClick(-1, beastHP, "subMaxE")
+    onClick(-1, -1, "resetMaxW")
 
     self.addForce({x=0,y=-1,z=0})
     wildShapeToken.destruct()
@@ -1268,15 +1285,16 @@ function endWildShape()
 end
 
 function wildShape(description, beastJSON)
-    -- TODO: Add new wildshape HP bar (rather than using the extra bar)
-    -- TODO: Can we actually transform the model itself?
-    -- TODO: UI height up to max of beast model?
-    -- TODO: Prevent alteration of HP when wildshaped?
-    -- TODO: Have wildshape be a UI popup to avoid context clutter?
-    -- TODO: Individual wild shapes (each person gets their own bag)?
-    -- TODO: End wildshpae or do wildshape, and if do wildshape already shaped end first
-    -- TODO: Add manual rotation of UI to already rotated object?
+    -- TODO: Add Hide Bar 4 and Max 4 options (in case someone casts aid or something)
+      -- TODO: But only if IN wildshape mayhaps?
     -- TODO: Make hide from players not a toggle, just make not visible or visible?
+    -- TODO: Can we actually transform the model itself? (Take properties, replace em)
+    -- TODO: UI height up to max of beast model? (Unsure if required if we can actually transform model)
+    -- TODO: Add manual rotation of object if ui is rotated? 
+      -- TODO: Add context menu rotate object option?
+    -- IDEA: Individual wild shapes (each person gets their own bag)?
+    -- BUG: Accidentally turning your wild shape object into a player can really screw you up
+    -- TODO: Have wildshape be a UI popup to avoid context clutter?
 
     hideFromPlayers = false
     toggleHideFromPlayers()
@@ -1305,8 +1323,8 @@ function wildShape(description, beastJSON)
     })
     wildShapeToken.addContextMenuItem("End Wildshape", endWildShape)
 
-    onClick(-1, -1, "HE")
-    onClick(-1, beastHP, "addMaxE")
+    onClick(-1, -1, "HW")
+    onClick(-1, beastHP, "setMaxW")
     preWildShapeInit = options.initSettingsMod
     onEndEdit(-1, beastInit, "InitModInput")
     isWildShaped = true
@@ -1604,7 +1622,7 @@ function onClick(player_in, value, id)
         local vertical = self.UI.getAttribute("bars", "height")
         Wait.frames(function()
             self.UI.setAttribute("HH", "textColor", options.hideHp == true and "#AA2222" or "#FFFFFF")
-            self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true) and "True" or "False")
+            self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true and options.hideWildShapeHP == true) and "True" or "False")
             self.UI.setAttribute("resourceBar", "active", options.hideHp == true and "False" or "True")
             self.UI.setAttribute("bars", "height", vertical + (options.hideHp == true and -100 or 100))
         end, 1)
@@ -1623,7 +1641,7 @@ function onClick(player_in, value, id)
         local vertical = self.UI.getAttribute("bars", "height")
         Wait.frames(function()
             self.UI.setAttribute("HM", "textColor", options.hideMana == true and "#AA2222" or "#FFFFFF")
-            self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true) and "True" or "False")
+            self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true and options.hideWildShapeHP == true) and "True" or "False")
             self.UI.setAttribute("resourceBarS", "active", options.hideMana == true and "False" or "True")
             self.UI.setAttribute("bars", "height", vertical + (options.hideMana == true and -100 or 100))
         end, 1)
@@ -1632,20 +1650,31 @@ function onClick(player_in, value, id)
         local vertical = self.UI.getAttribute("bars", "height")
         Wait.frames(function()
             self.UI.setAttribute("HE", "textColor", options.hideExtra == true and "#AA2222" or "#FFFFFF")
-            self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true) and "True" or "False")
+            self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true and options.hideWildShapeHP == true) and "True" or "False")
             self.UI.setAttribute("extraBar", "active", options.hideExtra == true and "False" or "True")
             self.UI.setAttribute("bars", "height", vertical + (options.hideExtra == true and -100 or 100))
+        end, 1)
+    elseif id == "HW" then
+        options.hideWildShapeHP = not options.hideWildShapeHP
+        local vertical = self.UI.getAttribute("bars", "height")
+        Wait.frames(function()
+            self.UI.setAttribute("HW", "textColor", options.hideWildShapeHP == true and "#AA2222" or "#FFFFFF")
+            self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true and options.hideWildShapeHP == true) and "True" or "False")
+            self.UI.setAttribute("wildShapeBar", "active", options.hideWildShapeHP == true and "False" or "True")
+            self.UI.setAttribute("bars", "height", vertical + (options.hideWildShapeHP == true and -100 or 100))
         end, 1)
     elseif id == "HB" or id == "editButtonS1" or id == "editButtonS2" or id == "editButtonS3" then
         if options.showBarButtons then
             self.UI.setAttribute("addSub", "active", false)
             self.UI.setAttribute("addSubS", "active", false)
             self.UI.setAttribute("addSubE", "active", false)
+            self.UI.setAttribute("addSubW", "active", false)
             options.showBarButtons = false
         else
             self.UI.setAttribute("addSub", "active", true)
             self.UI.setAttribute("addSubS", "active", true)
             self.UI.setAttribute("addSubE", "active", true)
+            self.UI.setAttribute("addSubW", "active", true)
             options.showBarButtons = true
         end
         self.UI.setAttribute("HB", "textColor", options.showBarButtons == true and "#AA2222" or "#FFFFFF")
@@ -1658,12 +1687,16 @@ function onClick(player_in, value, id)
         if mana.value < 0 and not options.belowZero then mana.value = 0 end
         if extra.value > extra.max and not options.aboveMax then extra.value = extra.max end
         if extra.value < 0 and not options.belowZero then extra.value = 0 end
+        if wildShapeHP.value > wildShapeHP.max and not options.aboveMax then wildShapeHP.value = wildShapeHP.max end
+        if wildShapeHP.value < 0 and not options.belowZero then wildShapeHP.value = 0 end
         self.UI.setAttribute("progressBar", "percentage", health.value / health.max * 100)
         self.UI.setAttribute("progressBarS", "percentage", mana.value / mana.max * 100)
         self.UI.setAttribute("extraProgress", "percentage", extra.value / extra.max * 100)
+        self.UI.setAttribute("wildShapeHPProgress", "percentage", wildShapeHP.value / wildShapeHP.max * 100)
         self.UI.setAttribute("hpText", "text", health.value .. "/" .. health.max)
         self.UI.setAttribute("manaText", "text", mana.value .. "/" .. mana.max)
         self.UI.setAttribute("extraText", "text", extra.value .. "/" .. extra.max)
+        self.UI.setAttribute("wildShapeHPText", "text", wildShapeHP.value .. "/" .. wildShapeHP.max)
         if options.HP2Desc then
             self.setDescription(health.value .. "/" .. health.max)
         end
@@ -1677,12 +1710,16 @@ function onClick(player_in, value, id)
         if mana.value < 0 and not options.belowZero then mana.value = 0 end
         if extra.value > extra.max and not options.aboveMax then extra.value = extra.max end
         if extra.value < 0 and not options.belowZero then extra.value = 0 end
+        if wildShapeHP.value > wildShapeHP.max and not options.aboveMax then wildShapeHP.value = wildShapeHP.max end
+        if wildShapeHP.value < 0 and not options.belowZero then wildShapeHP.value = 0 end
         self.UI.setAttribute("progressBar", "percentage", health.value / health.max * 100)
         self.UI.setAttribute("progressBarS", "percentage", mana.value / mana.max * 100)
         self.UI.setAttribute("extraProgress", "percentage", extra.value / extra.max * 100)
+        self.UI.setAttribute("wildShapeHPProgress", "percentage", wildShapeHP.value / wildShapeHP.max * 100)
         self.UI.setAttribute("hpText", "text", health.value .. "/" .. health.max)
         self.UI.setAttribute("manaText", "text", mana.value .. "/" .. mana.max)
         self.UI.setAttribute("extraText", "text", extra.value .. "/" .. extra.max)
+        self.UI.setAttribute("wildShapeHPText", "text", wildShapeHP.value .. "/" .. wildShapeHP.max)
         if options.HP2Desc then
             self.setDescription(health.value .. "/" .. health.max)
         end
@@ -1698,12 +1735,16 @@ function onClick(player_in, value, id)
             mana.value = mana.value + getIncrement(value)
         elseif id == "addE" then
             extra.value = extra.value + getIncrement(value)
+        elseif id == "addW" then
+            wildShapeHP.value = wildShapeHP.value + getIncrement(value)
         elseif id == "sub" then
             health.value = health.value - getIncrement(value)
         elseif id == "subS" then
             mana.value = mana.value - getIncrement(value)
         elseif id == "subE" then
             extra.value = extra.value - getIncrement(value)
+        elseif id == "subW" then
+            wildShapeHP.value = wildShapeHP.value - getIncrement(value)
         elseif id == "addMax" then
             health.value = health.value + getIncrement(value)
             health.max = health.max + getIncrement(value)
@@ -1713,15 +1754,24 @@ function onClick(player_in, value, id)
         elseif id == "addMaxE" then
             extra.value = extra.value + getIncrement(value)
             extra.max = extra.max + getIncrement(value)
+        elseif id == "addMaxW" then
+            wildShapeHP.value = wildShapeHP.value + getIncrement(value)
+            wildShapeHP.max = wildShapeHP.max + getIncrement(value)
         elseif id == "subMax" then
             health.value = health.value - getIncrement(value)
             health.max = health.max - getIncrement(value)
         elseif id == "subMaxS" then
             mana.value = mana.value - getIncrement(value)
             mana.max = mana.max - getIncrement(value)
-        elseif id == "subMaxE" then
-            extra.value = extra.value - getIncrement(value)
-            extra.max = extra.max - getIncrement(value)
+        elseif id == "subMaxW" then
+            wildShapeHP.value = wildShapeHP.value - getIncrement(value)
+            wildShapeHP.max = wildShapeHP.max - getIncrement(value)
+        elseif id == "resetMaxW" then
+            wildShapeHP.value = 0
+            wildShapeHP.max = 0
+        elseif id == "setMaxW" then
+            wildShapeHP.value = value
+            wildShapeHP.max = value
         end
         if health.value > health.max and not options.aboveMax then health.value = health.max end
         if health.value < 0 and not options.belowZero then health.value = 0 end
@@ -1729,12 +1779,16 @@ function onClick(player_in, value, id)
         if mana.value < 0 and not options.belowZero then mana.value = 0 end
         if extra.value > extra.max and not options.aboveMax then extra.value = extra.max end
         if extra.value < 0 and not options.belowZero then extra.value = 0 end
+        if wildShapeHP.value > wildShapeHP.max and not options.aboveMax then wildShapeHP.value = wildShapeHP.max end
+        if wildShapeHP.value < 0 and not options.belowZero then wildShapeHP.value = 0 end
         self.UI.setAttribute("progressBar", "percentage", health.value / health.max * 100)
         self.UI.setAttribute("progressBarS", "percentage", mana.value / mana.max * 100)
         self.UI.setAttribute("extraProgress", "percentage", extra.value / extra.max * 100)
+        self.UI.setAttribute("wildShapeHPProgress", "percentage", wildShapeHP.value / wildShapeHP.max * 100)
         self.UI.setAttribute("hpText", "text", health.value .. "/" .. health.max)
         self.UI.setAttribute("manaText", "text", mana.value .. "/" .. mana.max)
         self.UI.setAttribute("extraText", "text", extra.value .. "/" .. extra.max)
+        self.UI.setAttribute("wildShapeHPText", "text", wildShapeHP.value .. "/" .. wildShapeHP.max)
         if options.HP2Desc then
             self.setDescription(health.value .. "/" .. health.max)
         end
@@ -1925,6 +1979,21 @@ LUAStop--lua]]
                 <HorizontalLayout spacing="625">
                     <Button id="subE" text="-" color="#FFFFFF" textColor="#000000"></Button>
                     <Button id="addE" text="+" color="#FFFFFF" textColor="#000000"></Button>
+                </HorizontalLayout>
+            </Panel>
+        </Panel>
+        <Panel id="wildShapeBar" active="true">
+            <ProgressBar id="wildShapeHPProgress" visibility="" height="100" width="600" showPercentageText="false" color="#000000FF" percentage="100" fillImageColor="#427131 "></ProgressBar>
+            <Text id="wildShapeHPText" visibility="" height="100" width="600" text="10/10"></Text>
+            <HorizontalLayout id="editButtonBar" height="100" width="600">
+                 <Button id="leftSide3" text="" color="#00000000"></Button>
+                 <Button id="editButton3" color="#00000000"></Button>
+                 <Button id="editButtonS3" text="" color="#00000000"></Button>
+            </HorizontalLayout>
+            <Panel id="addSubW" visibility="" height="100" width="825" active="false">
+                <HorizontalLayout spacing="625">
+                    <Button id="subW" text="-" color="#FFFFFF" textColor="#000000"></Button>
+                    <Button id="addW" text="+" color="#FFFFFF" textColor="#000000"></Button>
                 </HorizontalLayout>
             </Panel>
         </Panel>
