@@ -2757,7 +2757,6 @@ function updateInitPlayer(player)
                         end
                     end
                 end
-                player.pingTable(figureObj.getBounds().center)
             end
             -- no need for update, they are still present
             return
@@ -2795,7 +2794,6 @@ function updateInitPlayer(player)
                 end
             end
         end
-        player.pingTable(figureObj.getBounds().center)
     end
 end
 
