@@ -1021,6 +1021,72 @@ function rebuildContextMenu()
     else
         self.addContextMenuItem("[ ] Debugging", toggleDebug)
     end
+
+    if self.getStates() == nil then
+        self.addContextMenuItem("Set-Up Wild Shaping", setupWildShapeOptions)
+    end
+end
+
+function setupWildShapeOptions()
+    buildWildShape()
+    rebuildContextMenu()
+    updateSave()
+end
+
+function onStateChange(old_state_guid)
+    -- TODO: No "before state change?"
+    print("New state GUID: " .. self.guid)
+    print("Previous state GUID: " .. old_state_guid)
+end
+
+function buildWildShape() 
+    --TODO: Editing the player then changing states, then going back and no edit saving
+      -- TODO: Maybe on save, also save the saved states?
+    --TODO: Auto-make the new objects npcs?
+    --TODO: Store beast DC in desc too, to sort by and use in state name?
+    -- TODO: multiple states being npcs breaks things a bit?
+    -- TODO: Assign bags by uuid? Can we store multiple? Prob could but nah.
+    -- TODO: On end state, how to get wildshape back? Can I make a listener?
+    -- TODO: Add player hp to wildshape extra bar or somethin dumb?
+
+    local wildShapeBag = nil
+    local taggedBags = getObjectsWithTag("WildShape")
+    for i,bag in ipairs(taggedBags) do
+        if bag.getName() == "WildShape_Beasts" then
+            wildShapeBag = bag
+            break
+        end
+    end
+
+    local bagObjects = wildShapeBag.getData().ContainedObjects
+    table.sort(bagObjects, function(a, b) return a.Nickname < b.Nickname end)
+    
+    generateWildShapeStates(bagObjects)
+end
+
+function generateWildShapeStates(objs_to_add)
+    local data = self.getData()
+
+    if not data.States then
+        data.States = { }
+    end
+
+    local i = 1
+
+    while data.States[tostring(i)] do i = i + 1 end
+
+    i = i + 1  -- Skip current state.
+
+    while data.States[tostring(i)] do i = i + 1 end
+    for _, obj in ipairs(objs_to_add) do
+        local subData = JSON.encode(obj)
+        data.States[tostring(i)] = JSON.decode(subData)
+        i = i + 1
+    end
+
+    self.destruct()
+
+    spawnObjectJSON({ json = JSON.encode(data) })
 end
 
 function uiHeightUp()
