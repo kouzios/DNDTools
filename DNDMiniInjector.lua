@@ -481,7 +481,7 @@ function calculateInitiative()
 end
 
 function updateSave()
-    if onSaveFrameCount > 0 then
+    if onSaveFrameCount > 0 then -- Only allow one save to run at a time
         onSaveFrameCount = 120
         return
     end
@@ -490,7 +490,7 @@ function updateSave()
 end
 
 function updateSaveActual()
-    while onSaveFrameCount > 0 do
+    while onSaveFrameCount > 0 do -- Wait X frames
         onSaveFrameCount = onSaveFrameCount - 1
         coroutine.yield(0)
     end
@@ -525,7 +525,19 @@ function updateSaveActual()
         hideFromPlayers = hideFromPlayers,
         saveVersion = saveVersion
     })
+    
+    saveState()
+
     return 1
+end
+
+function saveState() 
+    if self ~= nil and self.getStates() ~= nil then
+        local data = self.getData()
+        if data.States then
+            data.States[1] = data
+        end
+    end
 end
 
 function onLoad(save_state)
@@ -1033,21 +1045,19 @@ function setupWildShapeOptions()
     updateSave()
 end
 
-function onStateChange(old_state_guid)
-    -- TODO: No "before state change?"
-    print("New state GUID: " .. self.guid)
-    print("Previous state GUID: " .. old_state_guid)
-end
-
 function buildWildShape() 
-    --TODO: Editing the player then changing states, then going back and no edit saving
-      -- TODO: Maybe on save, also save the saved states?
-    --TODO: Auto-make the new objects npcs?
-    --TODO: Store beast DC in desc too, to sort by and use in state name?
-    -- TODO: multiple states being npcs breaks things a bit?
+    -- TODO: Doing so fucks up the hp, initiatives, and ui height, pretty much everything.
+    
+    -- TODO: Only save player states?
     -- TODO: Assign bags by uuid? Can we store multiple? Prob could but nah.
-    -- TODO: On end state, how to get wildshape back? Can I make a listener?
+        -- TODO: Auto-assign color to wild shapes based on uuid's color?
     -- TODO: Add player hp to wildshape extra bar or somethin dumb?
+    -- TODO: initial hp bar height so low??
+    -- TODO: Any renaming automatic?
+    -- TODO: Creating a player creates a bag?
+    -- TODO: Store beast DC in desc too, to sort by and use in state name?
+    -- TODO: Wildshape and status bag?
+    -- TODO: Can I add an "end Wildshape" option?
 
     local wildShapeBag = nil
     local taggedBags = getObjectsWithTag("WildShape")
@@ -1072,20 +1082,16 @@ function generateWildShapeStates(objs_to_add)
     end
 
     local i = 1
-
     while data.States[tostring(i)] do i = i + 1 end
-
     i = i + 1  -- Skip current state.
-
     while data.States[tostring(i)] do i = i + 1 end
+
     for _, obj in ipairs(objs_to_add) do
-        local subData = JSON.encode(obj)
-        data.States[tostring(i)] = JSON.decode(subData)
+        data.States[tostring(i)] = obj
         i = i + 1
     end
 
     self.destruct()
-
     spawnObjectJSON({ json = JSON.encode(data) })
 end
 
