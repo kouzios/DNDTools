@@ -523,25 +523,14 @@ function updateSaveActual()
         miniHighlight = miniHighlight,
         highlightToggle = highlightToggle,
         hideFromPlayers = hideFromPlayers,
-        saveVersion = saveVersion
+        saveVersion = saveVersion,
+        guid = self.getGUID()
     })
-    
-    saveState()
 
     return 1
 end
 
-function saveState() 
-    if self ~= nil and self.getStates() ~= nil then
-        local data = self.getData()
-        if data.States then
-            data.States[1] = data
-        end
-    end
-end
-
 function onLoad(save_state)
-
     function onLoad_helper()
         coroutine.yield(0)
         if stabilizeOnDrop == true and self.held_by_color == nil then
@@ -563,7 +552,7 @@ function onLoad(save_state)
         if states ~= nil then
             for _, s in pairs(states) do
                 test_data = JSON.decode(s.lua_script_state)
-                if test_data ~= nil and test_data.saveVersion ~= nil and test_data.saveVersion > bestVersion then
+                if test_data ~= nil and test_data.saveVersion ~= nil and test_data.guid == saved_data.guid and test_data.saveVersion > bestVersion then
                     saved_data = test_data
                     bestVersion = test_data.saveVersion
                     coroutine.yield(0)
