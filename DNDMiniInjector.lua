@@ -1035,17 +1035,14 @@ function setupWildShapeOptions()
 end
 
 function buildWildShape() 
-    -- TODO: Doing so fucks up the hp, initiatives, and ui height, pretty much everything.
-    
-    -- TODO: Only save player states?
+    -- TODO: Port statuses over to wildshape?
+    -- TODO: Only save player states? Or do we want to keep wildshape states?
     -- TODO: Assign bags by uuid? Can we store multiple? Prob could but nah.
         -- TODO: Auto-assign color to wild shapes based on uuid's color?
-    -- TODO: Add player hp to wildshape extra bar or somethin dumb?
+        -- TODO: Creating a player creates a bag?
     -- TODO: initial hp bar height so low??
     -- TODO: Any renaming automatic?
-    -- TODO: Creating a player creates a bag?
-    -- TODO: Store beast DC in desc too, to sort by and use in state name?
-    -- TODO: Wildshape and status bag?
+    -- IDEA: Store beast DC in desc too, to sort by and use in state name?
     -- TODO: Can I add an "end Wildshape" option?
 
     local wildShapeBag = nil
