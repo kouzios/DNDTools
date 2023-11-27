@@ -552,9 +552,12 @@ function onLoad(save_state)
         if states ~= nil then
             for _, s in pairs(states) do
                 test_data = JSON.decode(s.lua_script_state)
-                if test_data ~= nil and test_data.saveVersion ~= nil and test_data.guid == saved_data.guid and test_data.saveVersion > bestVersion then
-                    saved_data = test_data
-                    bestVersion = test_data.saveVersion
+                if test_data ~= nil and test_data.saveVersion ~= nil and test_data.saveVersion > bestVersion then
+                    if test_data.guid == saved_data.guid then
+                        saved_data = test_data
+                        bestVersion = test_data.saveVersion
+                    end
+                    saved_data.statNames = test_data.statNames -- Roll status over to new state
                     coroutine.yield(0)
                 end
             end
@@ -1036,14 +1039,19 @@ end
 
 function buildWildShape() 
     -- TODO: Port statuses over to wildshape?
-    -- TODO: Only save player states? Or do we want to keep wildshape states?
-    -- TODO: Assign bags by uuid? Can we store multiple? Prob could but nah.
+      -- TODO: Save when status applied?
+    -- TODO: Assign bags by uuid?
         -- TODO: Auto-assign color to wild shapes based on uuid's color?
         -- TODO: Creating a player creates a bag?
     -- TODO: initial hp bar height so low??
     -- TODO: Any renaming automatic?
     -- IDEA: Store beast DC in desc too, to sort by and use in state name?
     -- TODO: Can I add an "end Wildshape" option?
+    -- TODO: Prevent injection if already has states?
+    -- TODO: Hitting wildshape before saving breaks things
+    -- TODO: Only make state-restricted rollover if wildshaping?
+    -- TODO: Wish there was a tryChangeState or something..
+    -- TODO: Ok really though, can we make this save faster?
 
     local wildShapeBag = nil
     local taggedBags = getObjectsWithTag("WildShape")
