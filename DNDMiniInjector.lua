@@ -481,16 +481,26 @@ function calculateInitiative()
 end
 
 function updateSave()
-    if onSaveFrameCount > 0 then -- Only allow one save to run at a time
-        onSaveFrameCount = 120
+    -- If user is spamming saves, then wait X frames for the spamming to end, then save
+    --   30 frames is effective at 60FPs capped, but has limited effect depending on uncapped fps
+    --   120 frames is more effective at higher FPS, but causes saves to take 2-3 seconds at 60 FPS
+    --   So for each of state-changing, I am lowering the frames-per-save when you have mulitiple states
+    --   That way, there are fewer "Not yet saved" issues when trying to quickly move between states
+    local framesPerSave = 120
+    if self ~= nil and self.getData() ~= nil and self.getData().States ~= nil then
+        framesPerSave = 30
+    end
+
+    if onSaveFrameCount > 0 then
+        onSaveFrameCount = framesPerSave
         return
     end
-    onSaveFrameCount = 120
+    onSaveFrameCount = framesPerSave
     startLuaCoroutine(self, "updateSaveActual")
 end
 
 function updateSaveActual()
-    while onSaveFrameCount > 0 do -- Wait X frames
+    while onSaveFrameCount > 0 do
         onSaveFrameCount = onSaveFrameCount - 1
         coroutine.yield(0)
     end
@@ -1038,20 +1048,18 @@ function setupWildShapeOptions()
 end
 
 function buildWildShape() 
-    -- TODO: Port statuses over to wildshape?
-      -- TODO: Save when status applied?
+    -- TODO: initial hp bar height so low??
     -- TODO: Assign bags by uuid?
         -- TODO: Auto-assign color to wild shapes based on uuid's color?
         -- TODO: Creating a player creates a bag?
-    -- TODO: initial hp bar height so low??
     -- TODO: Any renaming automatic?
     -- IDEA: Store beast DC in desc too, to sort by and use in state name?
     -- TODO: Can I add an "end Wildshape" option?
     -- TODO: Prevent injection if already has states?
     -- TODO: Hitting wildshape before saving breaks things
     -- TODO: Only make state-restricted rollover if wildshaping?
-    -- TODO: Wish there was a tryChangeState or something..
-    -- TODO: Ok really though, can we make this save faster?
+    -- TODO: Quick switching before a save is registered throws err
+    -- TODO: Quick switching before a wildshape is established throws err
 
     local wildShapeBag = nil
     local taggedBags = getObjectsWithTag("WildShape")
