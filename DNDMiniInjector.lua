@@ -1048,18 +1048,16 @@ function setupWildShapeOptions()
 end
 
 function buildWildShape() 
-    -- TODO: initial hp bar height so low??
-    -- TODO: Assign bags by uuid?
-        -- TODO: Auto-assign color to wild shapes based on uuid's color?
-        -- TODO: Creating a player creates a bag?
-    -- TODO: Any renaming automatic?
-    -- IDEA: Store beast DC in desc too, to sort by and use in state name?
-    -- TODO: Can I add an "end Wildshape" option?
-    -- TODO: Prevent injection if already has states?
-    -- TODO: Hitting wildshape before saving breaks things
-    -- TODO: Only make state-restricted rollover if wildshaping?
+    -- TODO: Store if wildshaped and use for ending and saving and the like
+        -- TODO: Add an "end Wildshape" option? (Instead of reset at first, if possible)
+    -- BUG: Reset (not end wildshape) doesn't update context menu. Is there an onReset?
+    -- TODO: Prevent injection if already has states? (Did I already do this?)
     -- TODO: Quick switching before a save is registered throws err
     -- TODO: Quick switching before a wildshape is established throws err
+    -- IDEA: Assign bags by uuid?
+        -- IDEA: Auto-assign color to wild shapes based on uuid's color?
+        -- IDEA: Creating a player creates a bag?
+    -- TODO: Make initial hp bar height actually use the height? Or wait a picosecond?
 
     local wildShapeBag = nil
     local taggedBags = getObjectsWithTag("WildShape")
@@ -1068,6 +1066,11 @@ function buildWildShape()
             wildShapeBag = bag
             break
         end
+    end
+
+    if wildShapeBag == nil or wildShapeBag.getData() == nil or wildShapeBag.getData().ContainedObjects == nil then
+        print("Unable to set up wildshaping. Bag of name 'WildShape_Beasts' and tag 'WildShape' was either not found, or empty.")
+        return
     end
 
     local bagObjects = wildShapeBag.getData().ContainedObjects
