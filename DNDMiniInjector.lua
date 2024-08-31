@@ -1387,12 +1387,6 @@ function adjustHP(difference)
     health.value = health.value + intDiff
     if health.value > health.max and not options.aboveMax then health.value = health.max end
     if health.value < 0 and not options.belowZero then health.value = 0 end
-    if player == false and health.value <= 0 and options.initSettingsIncluded == true and options.initRealActive == true then
-        options.initSettingsIncluded = false
-        self.UI.setAttribute("InitiativeIncludeToggle", "textColor", options.initSettingsIncluded == true and "#AA2222" or "#FFFFFF")
-        miniHighlight = "highlightNone"
-        updateHighlight()
-    end
     self.UI.setAttribute("hpText", "text", health.value .. "/" .. health.max)
     self.UI.setAttribute("progressBar", "percentage", health.value / health.max * 100)
     updateRollers()
@@ -1404,12 +1398,6 @@ function setHP(newHP)
     health.value = intNewHP
     if health.value > health.max and not options.aboveMax then health.value = health.max end
     if health.value < 0 and not options.belowZero then health.value = 0 end
-    if player == false and health.value <= 0 and options.initSettingsIncluded == true and options.initRealActive == true then
-        options.initSettingsIncluded = false
-        self.UI.setAttribute("InitiativeIncludeToggle", "textColor", options.initSettingsIncluded == true and "#AA2222" or "#FFFFFF")
-        miniHighlight = "highlightNone"
-        updateHighlight()
-    end
     self.UI.setAttribute("hpText", "text", health.value .. "/" .. health.max)
     self.UI.setAttribute("progressBar", "percentage", health.value / health.max * 100)
     updateRollers()
@@ -1427,10 +1415,6 @@ function setHPMax(newHPMax)
     health.max = intNewHPMax
     if health.value > health.max and not options.aboveMax then health.value = health.max end
     if health.value < 0 and not options.belowZero then health.value = 0 end
-    if player == false and health.value <= 0 and options.initSettingsIncluded == true and options.initRealActive == true then
-        options.initSettingsIncluded = false
-        self.UI.setAttribute("InitiativeIncludeToggle", "textColor", options.initSettingsIncluded == true and "#AA2222" or "#FFFFFF")
-    end
     self.UI.setAttribute("hpText", "text", health.value .. "/" .. health.max)
     self.UI.setAttribute("progressBar", "percentage", health.value / health.max * 100)
     updateRollers()
@@ -1644,10 +1628,6 @@ function onClick(player_in, value, id)
         self.UI.setAttribute("extraText", "text", extra.value .. "/" .. extra.max)
         if options.HP2Desc then
             self.setDescription(health.value .. "/" .. health.max)
-        end
-        if player == false and health.value <= 0 and options.initSettingsIncluded == true and options.initRealActive == true then
-            options.initSettingsIncluded = false
-            self.UI.setAttribute("InitiativeIncludeToggle", "textColor", options.initSettingsIncluded == true and "#AA2222" or "#FFFFFF")
         end
         updateRollers()
     end
@@ -1972,7 +1952,7 @@ options = {
     extra = 0,
     initActive = false,
     initCurrentValue = 0,
-    initCurrentRound = 1,
+    initCurrentRound = 0,
     initCurrentGUID = ""
 }
 
@@ -2694,7 +2674,7 @@ end
 function resetInitiative()
     options.initActive = false
     options.initCurrentValue = 0
-    options.initCurrentRound = 1
+    options.initCurrentRound = 0
     options.initCurrentGUID = ""
     getInitiativeFigures()
     for i, figure in ipairs(initFigures) do
@@ -2732,7 +2712,7 @@ function rollInitiative(player)
             options.initCurrentGUID = figure.guidValue
             break
         end
-        options.initCurrentRound = 1
+        options.initCurrentRound = 0
     else
         updateInitPlayer(player)
     end
@@ -2831,7 +2811,7 @@ function backwardInitiative(player)
         return
     end
 
-    if options.initCurrentRound > 1 then
+    if options.initCurrentRound >= 1 then
         options.initCurrentRound = options.initCurrentRound - 1
     end
 
@@ -2842,7 +2822,9 @@ end
 --Format each result into a string that goes into notes
 function setInitiativeNotes()
     --Ensures we still display round count when initiative displaying is disabled
-    local noteString = "[CFCFCF]-------- INITIATIVE --------\n-------- ROUND " .. options.initCurrentRound .. " ---------\n-----------------------------\n[-]"
+    local roundCount = math.floor(options.initCurrentRound / 5) + 1
+    local subRoundCount = (options.initCurrentRound % 5) + 1
+    local noteString = "[CFCFCF]----- INITIATIVE ROUND " .. roundCount .. ", SUB ROUND " .. subRoundCount ..  " ---\n[-]"
     if displayInitiative == true then
         for i, figure in ipairs(initFigures) do
             if figure.options.hideInitiative == false and (figure.player == true or displayNPCInitiative == true) then
