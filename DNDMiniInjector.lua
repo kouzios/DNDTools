@@ -412,6 +412,7 @@ options = {
     advInitiative = false,
     hideMana = true,
     hideExtra = true,
+    hideName = false,
     incrementBy = 1,
     rotation = 90,
     initSettingsIncluded = true,
@@ -688,6 +689,7 @@ end
 function loadStageTwo()
     self.UI.setAttribute("panel", "position", "0 0 -" .. self.getBounds().size.y / self.getScale().y * options.heightModifier)
     self.UI.setAttribute("progressBar", "percentage", health.value / health.max * 100)
+    self.UI.setAttribute("nameText", "text", self.getName())
     self.UI.setAttribute("hpText", "text", health.value .. "/" .. health.max)
     self.UI.setAttribute("progressBarS", "percentage", mana.value / mana.max * 100)
     self.UI.setAttribute("manaText", "text", mana.value .. "/" .. mana.max)
@@ -727,6 +729,7 @@ function loadStageTwo()
 
     self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true) and "True" or "False")
 
+    self.UI.setAttribute("nameBar", "active", options.hideName == true and "False" or "True")
     self.UI.setAttribute("resourceBar", "active", options.hideHp == true and "False" or "True")
     self.UI.setAttribute("resourceBarS", "active", options.hideMana == true and "False" or "True")
     self.UI.setAttribute("extraBar", "active", options.hideExtra == true and "False" or "True")
@@ -742,6 +745,7 @@ function loadStageTwo()
     self.UI.setAttribute("MeasureMoveToggle", "textColor", measureMove == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("AlternateDiagToggle", "textColor", alternateDiag == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("MetricModeToggle", "textColor", metricMode == true and "#AA2222" or "#FFFFFF")
+    self.UI.setAttribute("NameToggle", "textColor", options.hideName == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("StabilizeToggle", "textColor", stabilizeOnDrop == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("AI", "textColor", options.advInitiative == true and "#AA2222" or "#FFFFFF")
     self.UI.setAttribute("HI", "textColor", options.hideInitiative == true and "#AA2222" or "#FFFFFF")
@@ -772,11 +776,13 @@ function loadStageTwo()
                 self.UI.setAttribute("AlternateDiagToggle", "textColor", alternateDiag == true and "#AA2222" or "#FFFFFF")
                 metricMode = injOptions.metricMode
                 self.UI.setAttribute("MetricModeToggle", "textColor", metricMode == true and "#AA2222" or "#FFFFFF")
+                self.UI.setAttribute("NameToggle", "textColor", options.hideName == true and "#AA2222" or "#FFFFFF")
                 coroutine.yield(0)
                 if player == true then
                     self.UI.setAttribute("progressBar", "visibility", "")
                     self.UI.setAttribute("progressBarS", "visibility", "")
                     self.UI.setAttribute("extraProgress", "visibility", "")
+                    self.UI.setAttribute("nameText", "visibility", "")
                     self.UI.setAttribute("hpText", "visibility", "")
                     self.UI.setAttribute("manaText", "visibility", "")
                     self.UI.setAttribute("extraText", "visibility", "")
@@ -978,10 +984,12 @@ function onUpdate()
             self.UI.setAttribute("panel", "position", "0 0 -" .. (options.heightModifier + 1))
             self.UI.setAttribute("panel", "position", "0 0 -" .. options.heightModifier)
             local vertical = 0
+            vertical = vertical + (options.hideName == true and 0 or 100)
             vertical = vertical + (options.hideHp == true and 0 or 100)
             vertical = vertical + (options.hideMana == true and 0 or 100)
             vertical = vertical + (options.hideExtra == true and 0 or 100)
             self.UI.setAttribute("hiddenButtonBar", "active", (options.hideHp == true and options.hideMana == true and options.hideExtra == true) and "True" or "False")
+            self.UI.setAttribute("nameBar", "active", options.hideName == true and "False" or "True")
             self.UI.setAttribute("resourceBar", "active", options.hideHp == true and "False" or "True")
             self.UI.setAttribute("resourceBarS", "active", options.hideMana == true and "False" or "True")
             self.UI.setAttribute("extraBar", "active", options.hideExtra == true and "False" or "True")
@@ -1499,6 +1507,13 @@ function onClick(player_in, value, id)
             self.UI.setAttribute("resourceBar", "active", options.hideHp == true and "False" or "True")
             self.UI.setAttribute("bars", "height", vertical + (options.hideHp == true and -100 or 100))
         end, 1)
+    elseif id == "NameToggle" then 
+        options.hideName = not options.hideName
+        Wait.frames(function()
+            self.UI.setAttribute("nameText", "text", self.getName())
+            self.UI.setAttribute("NameToggle", "textColor", options.hideName == true and "#AA2222" or "#FFFFFF")
+            self.UI.setAttribute("nameBar", "active", options.hideName == true and "False" or "True")
+        end, 1)
     elseif id == "HI" then
 	    options.hideInitiative = not options.hideInitiative
         Wait.frames(function()
@@ -1768,6 +1783,9 @@ LUAStop--lua]]
                  <Button id="editButton0" color="#00000000"><Image image="UpArrow" preserveAspect="true"></Image></Button>
             </HorizontalLayout>
         </Panel>
+        <Panel id="nameBar" active="true">
+            <Text id="nameText" visibility="" height="100" width="1200" text="" color="#FFFFFF"></Text>
+        </Panel>
         <Panel id="resourceBar" active="true">
             <ProgressBar id="progressBar" visibility="" height="100" width="600" showPercentageText="false" color="#000000FF" percentage="100" fillImageColor="#710000"></ProgressBar>
             <Text id="hpText" visibility="" height="100" width="600" text="10/10"></Text>
@@ -1814,7 +1832,7 @@ LUAStop--lua]]
             </Panel>
         </Panel>
     </VerticalLayout>
-    <Panel id="editPanel" height="1864" width="800" color="#330000FF" position="0 1290 0" active="False">
+    <Panel id="editPanel" height="1964" width="800" color="#330000FF" position="0 1290 0" active="False">
         <ProgressBar id="blackBackground" visibility="" height="1620" width="800" showPercentageText="false" color="#330000FF" percentage="100" fillImageColor="#330000FF" position="0 -320 0"></ProgressBar>
         <HorizontalLayout>
             <VerticalLayout>
@@ -1836,8 +1854,9 @@ LUAStop--lua]]
                     <Button id="MeasureMoveToggle" onClick="toggleMeasure" fontSize="70" text="Measure Moves" color="#000000FF"></Button>
                     <Button id="AlternateDiagToggle" onClick="toggleAlternateDiag" fontSize="60" text="Alternate Diagonals" color="#000000FF"></Button>
                 </HorizontalLayout>
-                <HorizontalLayout minheight="100">
+                <HorizontalLayout minheight="160">
                     <Button id="MetricModeToggle" onClick="toggleMetricMode" fontSize="70" text="Metric Mode" color="#000000FF"></Button>
+                    <Button id="NameToggle" fontSize="70" text="Hide Name" color="#000000FF"></Button>
                 </HorizontalLayout>
                 <HorizontalLayout minheight="160">
                     <Button id="StabilizeToggle" onClick="toggleStabilizeOnDrop" fontSize="70" text="Stable Mini" color="#000000FF"></Button>
@@ -1943,6 +1962,7 @@ options = {
     hideAll = false,
     showAll = true,
     measureMove = false,
+    hideName = false,
     alternateDiag = false,
     metricMode = false,
     playerChar = false,
@@ -2410,6 +2430,7 @@ function toggleHideBars(player, value, id)
         if j ~= self and not j.getName():find("DND Mini Panel") then
             if j.getVar("className") == "DNDMiniInjector_Mini" then
                 if options.hideAll then
+                    j.UI.setAttribute("nameBar", "active", "false")
                     j.UI.setAttribute("resourceBar", "active", "false")
                     j.UI.setAttribute("resourceBarS", "active", "false")
                     j.UI.setAttribute("extraBar", "active", "false")
@@ -2421,6 +2442,9 @@ function toggleHideBars(player, value, id)
                     end
                     if not objTable.hideExtra then
                         j.UI.setAttribute("extraBar", "active", "true")
+                    end
+                    if not objTable.hideName then
+                        j.UI.setAttribute("nameBar", "active", "true")
                     end
                 end
             end
@@ -2470,6 +2494,7 @@ function injectToken(object)
     if not options.hideText and options.HP2Desc then
         object.setDescription(options.hp .. "/" .. options.hp)
     end
+    
     newScript = newScript:gsub("health = {value = 10, max = 10}", "health = {value = " .. options.hp ..", max = " .. options.hp .. "}")
     newScript = newScript:gsub("mana = {value = 10, max = 10}", "mana = {value = " .. options.mana ..", max = " .. options.mana .. "}")
     newScript = newScript:gsub("extra = {value = 10, max = 10}", "extra = {value = " .. options.extra ..", max = " .. options.extra .. "}")
@@ -2506,6 +2531,7 @@ function injectToken(object)
             newScript = newScript:gsub('id="extraText" visibility=""', 'id="extraText" visibility="Black"')
         end
         if options.hideBar == true then
+            newScript = newScript:gsub('id="nameBar" visibility=""', 'id="nameBar" visibility="Black"')
             newScript = newScript:gsub('id="progressBar" visibility=""', 'id="progressBar" visibility="Black"')
             newScript = newScript:gsub('id="progressBarS" visibility=""', 'id="progressBarS" visibility="Black"')
             newScript = newScript:gsub('id="extraProgress" visibility=""', 'id="extraProgress" visibility="Black"')
